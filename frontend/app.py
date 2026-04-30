@@ -21,7 +21,7 @@ st.set_page_config(
 
 @st.cache_data(ttl=300)
 def fetch_ohlcv(limit=70) -> pd.DataFrame:
-    df = yf.download("BTC-USD", period="10d", interval="1h",
+    df = yf.download("BTC-USD", period="30d", interval="1h",
                      progress=False, auto_adjust=True)
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
@@ -102,7 +102,7 @@ except Exception as e:
 width_val = U - L
 pct_up = ((U - current_price) / current_price) * 100
 pct_dn = ((current_price - L) / current_price) * 100
-price_up = current_price >= closes_live.iloc[-2]
+price_up = current_price >= closes_live.iloc[-2] if len(closes_live) >= 2 else True
 
 
 col_title, col_refresh = st.columns([6, 1])

@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
+import yfinance as yf
 from backend.model import predict_intervals
 
 st.set_page_config(
@@ -18,24 +19,25 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-@st.cache_data(ttl=60)
-def fetch_ticker() -> float:
-    r = requests.get("https://api.binance.com/api/v3/ticker/price",
-                     params={"symbol": "BTCUSDT"}, timeout=10)
-    r.raise_for_status()
-    return float(r.json()["price"])
-
 @st.cache_data(ttl=300)
 def fetch_ohlcv(limit=70) -> pd.DataFrame:
-    r = requests.get("https://api.binance.com/api/v3/klines",
-                     params={"symbol": "BTCUSDT", "interval": "1h", "limit": limit},
-                     timeout=10)
-    r.raise_for_status()
-    df = pd.DataFrame(r.json())[[0, 4]]
+    df = yf.download("BTC-USD", period="10d", interval="1h",
+                     progress=False, auto_adjust=True)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    df = df[["Close"]].tail(limit).reset_index()
     df.columns = ["open_time", "close"]
     df["close"] = df["close"].astype(float)
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    df["open_time"] = pd.to_datetime(df["open_time"]).dt.tz_localize(None)
     return df
+
+@st.cache_data(ttl=60)
+def fetch_ticker() -> float:
+    df = yf.download("BTC-USD", period="1d", interval="1m",
+                     progress=False, auto_adjust=True)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    return float(df["Close"].iloc[-1])
 
 @st.cache_data(ttl=3600)
 def run_backtest():

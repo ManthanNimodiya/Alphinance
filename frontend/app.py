@@ -19,20 +19,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-@st.cache_data(ttl=60)
-def fetch_ticker() -> float:
-    ticker = yf.Ticker("BTC-USD")
-    data = ticker.fast_info
-    return float(data["last_price"])
-
 @st.cache_data(ttl=300)
 def fetch_ohlcv(limit=70) -> pd.DataFrame:
-    df = yf.download("BTC-USD", period="7d", interval="1h", progress=False)
+    df = yf.download("BTC-USD", period="10d", interval="1h", progress=False, auto_adjust=True)
+    # yfinance returns MultiIndex columns — flatten them
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
     df = df[["Close"]].tail(limit).reset_index()
     df.columns = ["open_time", "close"]
     df["close"] = df["close"].astype(float)
     df["open_time"] = pd.to_datetime(df["open_time"]).dt.tz_localize(None)
     return df
+
+@st.cache_data(ttl=60)
+def fetch_ticker() -> float:
+    df = yf.download("BTC-USD", period="1d", interval="1m", progress=False, auto_adjust=True)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    return float(df["Close"].iloc[-1])
 
 @st.cache_data(ttl=3600)
 def run_backtest():

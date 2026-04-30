@@ -1,6 +1,6 @@
 ---
 title: Alphinance
-emoji: ₿
+emoji: 🪙
 colorFrom: blue
 colorTo: purple
 sdk: streamlit

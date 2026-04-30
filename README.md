@@ -1,3 +1,14 @@
+---
+title: Alphinance
+emoji: ₿
+colorFrom: blue
+colorTo: purple
+sdk: streamlit
+sdk_version: "1.43.0"
+app_file: frontend/app.py
+pinned: false
+---
+
 # ₿ Alphinance
 > BTC/USDT 1-Hour Prediction Interval System · AlphaI × Polaris Challenge
 

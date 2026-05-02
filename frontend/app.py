@@ -250,6 +250,6 @@ with b3:
 
 st.divider()
 st.markdown("##### Prediction History")
-st.dataframe(df_pred, use_container_width=True)
+st.dataframe(df_pred[df_pred["actual"].notna()], use_container_width=True)
 
 st.caption(f"Alphinance · AlphaI × Polaris Challenge · {last_updated}")

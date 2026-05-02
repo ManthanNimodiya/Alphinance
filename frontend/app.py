@@ -252,4 +252,4 @@ st.divider()
 st.markdown("##### Prediction History")
 st.dataframe(df_pred[df_pred["actual"].notna()], use_container_width=True)
 
-st.caption(f"Alphinance · AlphaI × Polaris Challenge · {last_updated}")
+st.caption(f"Alphinance · AlphaI × Polaris Challenge · {last_updated} · [Live Dashboard](https://huggingface.co/spaces/Manthan6683/Alphinance) · [GitHub](https://github.com/ManthanNimodiya/Alphinance)")

@@ -47,21 +47,21 @@ html, body, [class*="css"] {
     padding-bottom: 0;
 }
 .nav-left-top {
-    font-size: 0.72rem;
+    font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0.15em;
     color: #fff;
     text-transform: uppercase;
 }
 .nav-left-sub {
-    font-size: 0.58rem;
+    font-size: 0.78rem;
     letter-spacing: 0.12em;
     color: #444;
     text-transform: uppercase;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 .nav-right {
-    font-size: 0.6rem;
+    font-size: 0.82rem;
     letter-spacing: 0.14em;
     color: #444;
     text-transform: uppercase;
@@ -73,51 +73,51 @@ html, body, [class*="css"] {
 
 /* ── Section label ── */
 .sec-label {
-    font-size: 0.58rem;
+    font-size: 0.78rem;
     letter-spacing: 0.16em;
     color: #444;
     text-transform: uppercase;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 /* ── Price hero ── */
 .price-hero {
     font-family: 'DM Mono', monospace;
-    font-size: 4rem;
+    font-size: 4.8rem;
     font-weight: 300;
     color: #fff;
     letter-spacing: -0.04em;
     line-height: 1;
 }
-.price-delta-up   { font-size: 0.72rem; color: #fff; letter-spacing: 0.06em; }
-.price-delta-down { font-size: 0.72rem; color: #555; letter-spacing: 0.06em; }
-.price-meta       { font-size: 0.58rem; color: #333; letter-spacing: 0.08em; }
+.price-delta-up   { font-size: 0.95rem; color: #fff; letter-spacing: 0.06em; }
+.price-delta-down { font-size: 0.95rem; color: #555; letter-spacing: 0.06em; }
+.price-meta       { font-size: 0.78rem; color: #333; letter-spacing: 0.08em; }
 
 /* ── Stat ── */
 .stat {
     border-left: 1px solid #1a1a1a;
     padding-left: 20px;
 }
-.stat-label { font-size: 0.55rem; letter-spacing: 0.14em; color: #444; text-transform: uppercase; margin-bottom: 4px; }
-.stat-val   { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
-.stat-sub   { font-size: 0.58rem; color: #333; margin-top: 2px; }
+.stat-label { font-size: 0.75rem; letter-spacing: 0.14em; color: #444; text-transform: uppercase; margin-bottom: 5px; }
+.stat-val   { font-family: 'DM Mono', monospace; font-size: 1.7rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
+.stat-sub   { font-size: 0.78rem; color: #333; margin-top: 3px; }
 
 /* ── Interval ── */
 .iv-wrap {
     border: 1px solid #1a1a1a;
-    padding: 16px 22px;
+    padding: 18px 24px;
     margin-top: 14px;
 }
 .iv-row { display: flex; align-items: center; gap: 12px; }
-.iv-low  { font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 300; color: #777; letter-spacing: -0.02em; }
-.iv-high { font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
+.iv-low  { font-family: 'DM Mono', monospace; font-size: 2.2rem; font-weight: 300; color: #777; letter-spacing: -0.02em; }
+.iv-high { font-family: 'DM Mono', monospace; font-size: 2.2rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
 .iv-sep  {
     flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
     color: #222;
-    font-size: 0.58rem;
+    font-size: 0.78rem;
     letter-spacing: 0.1em;
 }
 .iv-sep::before,
@@ -131,15 +131,15 @@ html, body, [class*="css"] {
 /* ── Metric tile ── */
 .tile {
     border: 1px solid #1a1a1a;
-    padding: 14px 18px;
+    padding: 16px 20px;
 }
-.tile-label { font-size: 0.55rem; letter-spacing: 0.14em; color: #444; text-transform: uppercase; margin-bottom: 6px; }
-.tile-val   { font-family: 'DM Mono', monospace; font-size: 1.5rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
-.tile-sub   { font-size: 0.58rem; color: #333; margin-top: 3px; }
+.tile-label { font-size: 0.75rem; letter-spacing: 0.14em; color: #444; text-transform: uppercase; margin-bottom: 7px; }
+.tile-val   { font-family: 'DM Mono', monospace; font-size: 1.9rem; font-weight: 300; color: #fff; letter-spacing: -0.02em; }
+.tile-sub   { font-size: 0.78rem; color: #333; margin-top: 4px; }
 .tile-pass  .tile-val { color: #fff; }
 
 /* ── Comment style ── */
-.comment { font-size: 0.6rem; color: #2a2a2a; letter-spacing: 0.06em; }
+.comment { font-size: 0.8rem; color: #2a2a2a; letter-spacing: 0.06em; }
 </style>
 """, unsafe_allow_html=True)
 

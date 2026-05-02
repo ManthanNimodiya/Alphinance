@@ -24,182 +24,193 @@ st_autorefresh(interval=10_000, limit=10000, key="btc_live_refresh")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
+/* ── Kill Streamlit's default top padding ── */
+.block-container {
+    padding-top: 1.2rem !important;
+    padding-bottom: 1rem !important;
+    max-width: 100% !important;
+}
+[data-testid="stAppViewBlockContainer"] {
+    padding-top: 1.2rem !important;
 }
 
-/* ── Wordmark ── */
-.wordmark {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #f1f5f9;
-    letter-spacing: -0.02em;
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+
+/* ── Logo mark ── */
+.logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.wordmark span {
-    color: #38bdf8;
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: #1d1d27;
+    border: 1px solid #2e2e3e;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+}
+.logo-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    letter-spacing: -0.03em;
+}
+.logo-text sup {
+    font-size: 0.55rem;
+    font-weight: 500;
+    color: #52525b;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    vertical-align: super;
+    margin-left: 4px;
 }
 
 /* ── Pill badge ── */
 .pill {
     display: inline-block;
-    background: rgba(56,189,248,0.08);
-    border: 1px solid rgba(56,189,248,0.2);
-    color: #38bdf8;
-    font-size: 0.7rem;
+    background: #1c1c28;
+    border: 1px solid #2a2a3a;
+    color: #a1a1aa;
+    font-size: 0.68rem;
     font-weight: 500;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     padding: 3px 10px;
     border-radius: 999px;
 }
-.pill-green {
-    background: rgba(34,197,94,0.08);
-    border: 1px solid rgba(34,197,94,0.2);
-    color: #22c55e;
+.pill-live {
+    background: #0f2318;
+    border: 1px solid #166534;
+    color: #4ade80;
 }
 
-/* ── Big price number ── */
-.price-display {
+/* ── Price ── */
+.price-number {
     font-family: 'DM Mono', monospace;
-    font-size: 3.4rem;
-    font-weight: 500;
-    color: #f1f5f9;
-    letter-spacing: -0.03em;
+    font-size: 3rem;
+    font-weight: 400;
+    color: #fafafa;
+    letter-spacing: -0.04em;
     line-height: 1;
 }
-.price-delta-up   { color: #22c55e; font-size: 0.9rem; font-weight: 600; }
-.price-delta-down { color: #f87171; font-size: 0.9rem; font-weight: 600; }
+.delta-up   { font-size: 0.82rem; color: #4ade80; font-weight: 500; }
+.delta-down { font-size: 0.82rem; color: #f87171; font-weight: 500; }
+.meta-text  { font-size: 0.68rem; color: #3f3f46; }
 
-/* ── Stat block ── */
-.stat-block {
-    border-left: 2px solid #1e293b;
-    padding: 0 0 0 16px;
+/* ── Stat cols ── */
+.stat {
+    padding-left: 20px;
+    border-left: 1px solid #27272a;
 }
 .stat-label {
-    font-size: 0.7rem;
-    font-weight: 500;
+    font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
+    letter-spacing: 0.09em;
+    color: #52525b;
     margin-bottom: 4px;
 }
-.stat-value {
+.stat-val {
     font-family: 'DM Mono', monospace;
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: #e2e8f0;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #e4e4e7;
     letter-spacing: -0.02em;
 }
-.stat-sub {
-    font-size: 0.68rem;
-    color: #475569;
-    margin-top: 2px;
-}
+.stat-sub { font-size: 0.65rem; color: #3f3f46; margin-top: 2px; }
 
 /* ── Interval bar ── */
-.interval-wrap {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 20px 28px;
+.iv-wrap {
+    background: #111118;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 14px 22px;
+    margin-top: 12px;
 }
-.interval-label {
-    font-size: 0.68rem;
+.iv-label {
+    font-size: 0.62rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #475569;
-    margin-bottom: 14px;
+    color: #3f3f46;
+    margin-bottom: 10px;
 }
-.interval-row {
+.iv-row { display:flex; align-items:center; gap:10px; }
+.iv-low  {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.55rem;
+    color: #fca5a5;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+}
+.iv-high {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.55rem;
+    color: #86efac;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+}
+.iv-rule {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-.bound-low  {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.7rem;
-    font-weight: 500;
-    color: #f87171;
-    letter-spacing: -0.02em;
-}
-.bound-high {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.7rem;
-    font-weight: 500;
-    color: #4ade80;
-    letter-spacing: -0.02em;
-}
-.bound-sep {
-    flex: 1;
-    height: 1px;
-    background: #334155;
+    justify-content: center;
     position: relative;
 }
-.bound-sep::after {
-    content: '95% CI';
+.iv-rule::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: #27272a;
+}
+.iv-ci {
     position: absolute;
-    top: -9px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.6rem;
-    color: #475569;
-    background: #1e293b;
-    padding: 0 6px;
+    font-size: 0.58rem;
     letter-spacing: 0.06em;
+    color: #3f3f46;
+    background: #111118;
+    padding: 0 6px;
 }
 
 /* ── Metric tile ── */
 .tile {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 16px 20px;
+    background: #111118;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 14px 18px;
 }
-.tile-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #64748b;
-    margin-bottom: 6px;
-}
-.tile-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #e2e8f0;
-    letter-spacing: -0.02em;
-}
-.tile-sub {
-    font-size: 0.65rem;
-    color: #475569;
-    margin-top: 3px;
-}
-.tile-pass { border-top: 2px solid #22c55e; }
-.tile-neutral { border-top: 2px solid #38bdf8; }
+.tile-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.09em; color:#52525b; margin-bottom:5px; }
+.tile-val   { font-family:'DM Mono',monospace; font-size:1.4rem; font-weight:400; color:#e4e4e7; letter-spacing:-0.02em; }
+.tile-sub   { font-size:0.62rem; color:#3f3f46; margin-top:2px; }
+.tile-pass  { border-top: 2px solid #16a34a; }
+.tile-dim   { border-top: 2px solid #27272a; }
 
-/* ── Section heading ── */
-.sec-head {
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #475569;
-    margin: 32px 0 12px 0;
+/* ── Section label ── */
+.sec {
+    font-size:0.62rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:#3f3f46;
+    margin: 18px 0 8px 0;
 }
 
-/* ── Divider ── */
-hr { border-color: #1e293b !important; margin: 20px 0 !important; }
+/* ── Rule ── */
+.rule { border:none; border-top:1px solid #1c1c1c; margin: 14px 0; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── Data fetching ─────────────────────────────────────────────────────────────
+# ── Data ──────────────────────────────────────────────────────────────────────
 
 @st.cache_data(ttl=10)
 def fetch_ticker() -> tuple:
-    r = requests.get(f"{URL}/ticker/24hr",
-                     params={"symbol": "BTCUSDT"}, timeout=10)
+    r = requests.get(f"{URL}/ticker/24hr", params={"symbol": "BTCUSDT"}, timeout=10)
     r.raise_for_status()
     d = r.json()
     return float(d["lastPrice"]), float(d["priceChangePercent"])
@@ -223,27 +234,18 @@ def run_backtest():
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         "..", "backend", "data", "btc_1h.csv")
     closes = pd.read_csv(path)["close"]
-    alpha = 0.05
-    results = []
+    alpha, results = 0.05, []
     for t in range(21, 720):
         L, U = predict_intervals(closes, t)
-        actual = closes.iloc[t]
-        results.append({"L": L, "U": U, "actual": actual})
+        results.append({"L": L, "U": U, "actual": closes.iloc[t]})
     df = pd.DataFrame(results)
-    inside = (df["actual"] >= df["L"]) & (df["actual"] <= df["U"])
-    coverage = inside.mean()
-    avg_width = (df["U"] - df["L"]).mean()
-    width = df["U"] - df["L"]
-    winkler = np.where(
-        df["actual"] < df["L"],
-        width + (2 / alpha) * (df["L"] - df["actual"]),
-        np.where(
-            df["actual"] > df["U"],
-            width + (2 / alpha) * (df["actual"] - df["U"]),
-            width
-        )
-    )
-    return float(coverage), float(avg_width), float(np.mean(winkler))
+    inside  = (df["actual"] >= df["L"]) & (df["actual"] <= df["U"])
+    width   = df["U"] - df["L"]
+    winkler = np.where(df["actual"] < df["L"],
+                       width + (2/alpha)*(df["L"]-df["actual"]),
+                       np.where(df["actual"] > df["U"],
+                                width + (2/alpha)*(df["actual"]-df["U"]), width))
+    return float(inside.mean()), float(width.mean()), float(np.mean(winkler))
 
 
 def update_predictions(L, U, current_price):
@@ -261,8 +263,7 @@ def update_predictions(L, U, current_price):
         df_pred.loc[df_pred.index[-1], "inside"] = "Yes" if hit else "No"
     new_row = pd.DataFrame([{
         "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
-        "L": round(L, 2), "U": round(U, 2),
-        "actual": None, "inside": None
+        "L": round(L, 2), "U": round(U, 2), "actual": None, "inside": None
     }])
     df_pred = pd.concat([df_pred, new_row], ignore_index=True)
     df_pred.to_csv(path, index=False)
@@ -276,7 +277,7 @@ try:
     closes_live = df["close"].reset_index(drop=True)
     L, U        = predict_intervals(closes_live, t=len(closes_live))
     now_str     = datetime.utcnow().strftime("%H:%M:%S UTC")
-    today_str   = datetime.utcnow().strftime("%d %b %Y")
+    date_str    = datetime.utcnow().strftime("%d %b %Y")
 except Exception as e:
     st.error(f"Could not fetch data: {e}")
     st.stop()
@@ -293,98 +294,91 @@ df_pred   = update_predictions(L, U, price)
 # ══════════════════════════════════════════════════════════════════════════════
 
 # ── Top bar ──────────────────────────────────────────────────────────────────
-col_logo, col_meta, col_btn = st.columns([3, 5, 1])
+col_logo, col_pills, col_btn = st.columns([2, 6, 1])
 
 with col_logo:
     st.markdown("""
-    <div style="padding-top:6px;">
-        <span class="wordmark">Alpha<span>nance</span></span>
+    <div class="logo-wrap" style="padding-top:4px;">
+        <div class="logo-icon">◈</div>
+        <div class="logo-text">Alphinance<sup>beta</sup></div>
     </div>""", unsafe_allow_html=True)
 
-with col_meta:
+with col_pills:
+    live_color = "#4ade80"
     st.markdown(f"""
-    <div style="display:flex; gap:8px; align-items:center; padding-top:10px; flex-wrap:wrap;">
+    <div style="display:flex;gap:6px;align-items:center;padding-top:8px;flex-wrap:wrap;">
         <span class="pill">BTC / USDT</span>
-        <span class="pill">1-Hour</span>
-        <span class="pill-green pill">● Live · {now_str}</span>
-        <span style="font-size:0.68rem; color:#475569;">{today_str}</span>
+        <span class="pill">1H</span>
+        <span class="pill-live pill">● {now_str}</span>
+        <span class="meta-text">{date_str}</span>
     </div>""", unsafe_allow_html=True)
 
 with col_btn:
-    st.markdown("<div style='padding-top:4px;'>", unsafe_allow_html=True)
-    if st.button("↻", use_container_width=True, help="Clear cache and refresh"):
+    st.markdown("<div style='padding-top:2px;'>", unsafe_allow_html=True)
+    if st.button("↻ Refresh", use_container_width=True):
         fetch_ohlcv.clear()
         fetch_ticker.clear()
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown('<hr class="rule">', unsafe_allow_html=True)
 
-# ── Price + stats row ─────────────────────────────────────────────────────────
-delta_class = "price-delta-up" if chg >= 0 else "price-delta-down"
+# ── Price row ────────────────────────────────────────────────────────────────
 arrow       = "▲" if chg >= 0 else "▼"
+delta_class = "delta-up" if chg >= 0 else "delta-down"
 
-col_p, col_s1, col_s2, col_s3 = st.columns([4, 2, 2, 2])
+col_p, col_low, col_high, col_w = st.columns([4, 2, 2, 2])
 
 with col_p:
     st.markdown(f"""
-    <div>
-        <div style="font-size:0.68rem; text-transform:uppercase;
-                    letter-spacing:0.1em; color:#475569; margin-bottom:8px;">
-            Current Price
-        </div>
-        <div class="price-display">${price:,.2f}</div>
-        <div style="margin-top:6px;">
-            <span class="{delta_class}">{arrow} {abs(chg):.2f}% &nbsp;24h</span>
-            &nbsp;
-            <span style="font-size:0.68rem; color:#475569;">
-                ⚡ refreshes every 10s
-            </span>
+    <div style="padding:2px 0 0 0;">
+        <div class="meta-text" style="margin-bottom:6px;">CURRENT PRICE</div>
+        <div class="price-number">${price:,.2f}</div>
+        <div style="margin-top:5px;display:flex;gap:10px;align-items:center;">
+            <span class="{delta_class}">{arrow} {abs(chg):.2f}%&thinsp;24h</span>
+            <span class="meta-text">⚡ refreshes every 10s</span>
         </div>
     </div>""", unsafe_allow_html=True)
 
-with col_s1:
+with col_low:
     st.markdown(f"""
-    <div class="stat-block">
+    <div class="stat">
         <div class="stat-label">Next Low</div>
-        <div class="stat-value" style="color:#f87171;">${L:,.2f}</div>
+        <div class="stat-val" style="color:#fca5a5;">${L:,.2f}</div>
         <div class="stat-sub">−{pct_dn:.2f}%</div>
     </div>""", unsafe_allow_html=True)
 
-with col_s2:
+with col_high:
     st.markdown(f"""
-    <div class="stat-block">
+    <div class="stat">
         <div class="stat-label">Next High</div>
-        <div class="stat-value" style="color:#4ade80;">${U:,.2f}</div>
+        <div class="stat-val" style="color:#86efac;">${U:,.2f}</div>
         <div class="stat-sub">+{pct_up:.2f}%</div>
     </div>""", unsafe_allow_html=True)
 
-with col_s3:
+with col_w:
     st.markdown(f"""
-    <div class="stat-block">
+    <div class="stat">
         <div class="stat-label">Range Width</div>
-        <div class="stat-value">${width_val:,.2f}</div>
+        <div class="stat-val">${width_val:,.2f}</div>
         <div class="stat-sub">95% confidence</div>
     </div>""", unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-# ── Prediction interval bar ───────────────────────────────────────────────────
+# ── Interval bar ─────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div class="interval-wrap">
-    <div class="interval-label">Next 1-hour candle · predicted interval</div>
-    <div class="interval-row">
-        <span class="bound-low">${L:,.2f}</span>
-        <div class="bound-sep"></div>
-        <span class="bound-high">${U:,.2f}</span>
+<div class="iv-wrap">
+    <div class="iv-label">Next 1-hour candle · predicted interval</div>
+    <div class="iv-row">
+        <span class="iv-low">${L:,.2f}</span>
+        <div class="iv-rule"><span class="iv-ci">95% CI</span></div>
+        <span class="iv-high">${U:,.2f}</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-
 # ── Chart ─────────────────────────────────────────────────────────────────────
-st.markdown('<div class="sec-head">Price chart · last 50 bars</div>', unsafe_allow_html=True)
+st.markdown('<div class="sec" style="margin-top:16px;">Price chart · last 50 bars</div>',
+            unsafe_allow_html=True)
 
 display_df = df.tail(50).copy().reset_index(drop=True)
 next_time  = display_df["open_time"].iloc[-1] + pd.Timedelta(hours=1)
@@ -393,67 +387,45 @@ pred_x1    = next_time + pd.Timedelta(minutes=25)
 
 fig = go.Figure()
 
-# Candle close line
 fig.add_trace(go.Scatter(
-    x=display_df["open_time"],
-    y=display_df["close"],
-    mode="lines",
-    name="Close",
-    line=dict(color="#38bdf8", width=1.5),
+    x=display_df["open_time"], y=display_df["close"],
+    mode="lines", name="Close",
+    line=dict(color="#60a5fa", width=1.5),
     hovertemplate="<b>%{x}</b><br>$%{y:,.2f}<extra></extra>",
 ))
-
-# Shaded forecast zone
 fig.add_trace(go.Scatter(
     x=[display_df["open_time"].iloc[-1], pred_x1, pred_x1,
        display_df["open_time"].iloc[-1]],
     y=[U, U, L, L],
-    fill="toself",
-    fillcolor="rgba(56,189,248,0.06)",
-    line=dict(width=0),
-    showlegend=False,
-    hoverinfo="skip",
+    fill="toself", fillcolor="rgba(96,165,250,0.05)",
+    line=dict(width=0), showlegend=False, hoverinfo="skip",
 ))
-
-# Upper / lower dashed bounds
 fig.add_shape(type="line", x0=pred_x0, x1=pred_x1, y0=U, y1=U,
-              line=dict(color="#4ade80", width=1.5, dash="dot"))
+              line=dict(color="#86efac", width=1.2, dash="dot"))
 fig.add_shape(type="line", x0=pred_x0, x1=pred_x1, y0=L, y1=L,
-              line=dict(color="#f87171", width=1.5, dash="dot"))
-
-# "Now" vertical rule
+              line=dict(color="#fca5a5", width=1.2, dash="dot"))
 fig.add_vline(
     x=display_df["open_time"].iloc[-1].timestamp() * 1000,
-    line_width=1,
-    line_dash="dot",
-    line_color="rgba(255,255,255,0.1)",
+    line_width=1, line_dash="dot", line_color="#27272a",
 )
-
 fig.update_layout(
-    height=340,
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter", size=11, color="#64748b"),
-    margin=dict(l=0, r=0, t=8, b=0),
-    xaxis=dict(
-        showgrid=True, gridcolor="#1e293b",
-        zeroline=False, tickfont=dict(size=10),
-    ),
-    yaxis=dict(
-        showgrid=True, gridcolor="#1e293b",
-        zeroline=False, tickprefix="$", tickformat=",.0f",
-        tickfont=dict(size=10),
-    ),
+    height=320,
+    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(family="Inter", size=10, color="#52525b"),
+    margin=dict(l=0, r=0, t=4, b=0),
+    xaxis=dict(showgrid=True, gridcolor="#18181b", zeroline=False,
+               tickfont=dict(size=9)),
+    yaxis=dict(showgrid=True, gridcolor="#18181b", zeroline=False,
+               tickprefix="$", tickformat=",.0f", tickfont=dict(size=9)),
     hovermode="x unified",
     legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=10)),
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown('<hr class="rule">', unsafe_allow_html=True)
 
-# ── Backtest metrics ──────────────────────────────────────────────────────────
-st.markdown('<div class="sec-head">Backtest · 720 hourly bars · 30 days</div>',
+# ── Backtest ──────────────────────────────────────────────────────────────────
+st.markdown('<div class="sec">Backtest · 720 hourly bars · 30 days</div>',
             unsafe_allow_html=True)
 
 with st.spinner(""):
@@ -464,9 +436,9 @@ b1, b2, b3 = st.columns(3)
 
 with b1:
     st.markdown(f"""
-    <div class="tile {'tile-pass' if ok else 'tile-neutral'}">
+    <div class="tile {'tile-pass' if ok else 'tile-dim'}">
         <div class="tile-label">Coverage</div>
-        <div class="tile-value" style="color:{'#4ade80' if ok else '#f87171'};">
+        <div class="tile-val" style="color:{'#4ade80' if ok else '#f87171'};">
             {coverage*100:.2f}%
         </div>
         <div class="tile-sub">{'✓ meets 95% target' if ok else '✗ below target'}</div>
@@ -474,47 +446,44 @@ with b1:
 
 with b2:
     st.markdown(f"""
-    <div class="tile tile-neutral">
+    <div class="tile tile-dim">
         <div class="tile-label">Avg Width</div>
-        <div class="tile-value">${avg_width_bt:,.2f}</div>
+        <div class="tile-val">${avg_width_bt:,.2f}</div>
         <div class="tile-sub">lower is better</div>
     </div>""", unsafe_allow_html=True)
 
 with b3:
     st.markdown(f"""
-    <div class="tile tile-neutral">
+    <div class="tile tile-dim">
         <div class="tile-label">Winkler Score</div>
-        <div class="tile-value">{winkler_score:,.2f}</div>
+        <div class="tile-val">{winkler_score:,.2f}</div>
         <div class="tile-sub">lower is better</div>
     </div>""", unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<hr>", unsafe_allow_html=True)
+st.markdown('<hr class="rule">', unsafe_allow_html=True)
 
-# ── Prediction history ────────────────────────────────────────────────────────
-st.markdown('<div class="sec-head">Prediction history</div>', unsafe_allow_html=True)
+# ── History ───────────────────────────────────────────────────────────────────
+st.markdown('<div class="sec">Prediction history</div>', unsafe_allow_html=True)
 history = df_pred[df_pred["actual"].notna()].copy()
 if history.empty:
-    st.markdown(
-        '<p style="font-size:0.8rem; color:#475569;">No resolved predictions yet.</p>',
-        unsafe_allow_html=True)
+    st.markdown('<p style="font-size:0.78rem;color:#3f3f46;">No resolved predictions yet.</p>',
+                unsafe_allow_html=True)
 else:
     st.dataframe(history, use_container_width=True, hide_index=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="margin-top:40px; padding-top:16px; border-top:1px solid #1e293b;
-            display:flex; justify-content:space-between; align-items:center;
-            flex-wrap:wrap; gap:8px;">
-    <span style="font-size:0.68rem; color:#334155;">
-        Alphinance · Student-t rolling interval · AlphaI × Polaris Challenge
+<div style="margin-top:24px;padding-top:12px;border-top:1px solid #18181b;
+            display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+    <span style="font-size:0.62rem;color:#27272a;">
+        Alphinance · Student-t rolling interval · AlphaI × Polaris Challenge · {date_str}
     </span>
-    <span style="font-size:0.68rem; color:#334155;">
+    <span style="font-size:0.62rem;">
         <a href="https://huggingface.co/spaces/Manthan6683/Alphinance"
-           style="color:#38bdf8; text-decoration:none;">Live Dashboard</a>
+           style="color:#3f3f46;text-decoration:none;">Live Dashboard</a>
         &nbsp;·&nbsp;
         <a href="https://github.com/ManthanNimodiya/Alphinance"
-           style="color:#38bdf8; text-decoration:none;">GitHub</a>
+           style="color:#3f3f46;text-decoration:none;">GitHub</a>
     </span>
 </div>
 """, unsafe_allow_html=True)

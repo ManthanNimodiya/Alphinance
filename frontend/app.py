@@ -9,8 +9,9 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
-import yfinance as yf
 from backend.model import predict_intervals
+
+BINANCE_BASE = "https://data-api.binance.vision/api/v3"
 
 st.set_page_config(
     page_title="Alphinance | BTC Prediction",
@@ -19,25 +20,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-@st.cache_data(ttl=300)
-def fetch_ohlcv(limit=70) -> pd.DataFrame:
-    df = yf.download("BTC-USD", period="30d", interval="1h",
-                     progress=False, auto_adjust=True)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    df = df[["Close"]].tail(limit).reset_index()
-    df.columns = ["open_time", "close"]
-    df["close"] = df["close"].astype(float)
-    df["open_time"] = pd.to_datetime(df["open_time"]).dt.tz_localize(None)
-    return df
-
 @st.cache_data(ttl=60)
 def fetch_ticker() -> float:
-    df = yf.download("BTC-USD", period="1d", interval="1m",
-                     progress=False, auto_adjust=True)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    return float(df["Close"].iloc[-1])
+    r = requests.get(f"{BINANCE_BASE}/ticker/price",
+                     params={"symbol": "BTCUSDT"}, timeout=10)
+    r.raise_for_status()
+    return float(r.json()["price"])
+
+@st.cache_data(ttl=300)
+def fetch_ohlcv(limit=70) -> pd.DataFrame:
+    r = requests.get(f"{BINANCE_BASE}/klines",
+                     params={"symbol": "BTCUSDT", "interval": "1h", "limit": limit},
+                     timeout=10)
+    r.raise_for_status()
+    df = pd.DataFrame(r.json())[[0, 4]]
+    df.columns = ["open_time", "close"]
+    df["close"] = df["close"].astype(float)
+    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    return df
 
 @st.cache_data(ttl=3600)
 def run_backtest():
@@ -84,7 +84,38 @@ def run_backtest():
 
     return float(coverage), float(avg_width), float(winkler_score)
 
+# Bonus - Persistence Model
+def update_predictions(L, U, current_price):
+    # load csv
+    path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..", "backend", "data", "predictions.csv"
+    )
+    # Check exists
+    if os.path.exists(path):
+        df_pred = pd.read_csv(path, dtype={"inside":str})
+    else:
+        df_pred = pd.DataFrame(columns=["timestamp", "L", "U", "actual", "inside"])
+    # Append new row — timestamp = datetime.utcnow(), L, U, actual=None, inside=None
+    if len(df_pred) > 0:
+        df_pred.loc[df_pred.index[-1], "actual"] = current_price
+        hit = df_pred.loc[df_pred.index[-1], "L"] <= current_price <= df_pred.loc[df_pred.index[-1], "U"]
+        
+        df_pred.loc[df_pred.index[-1], "inside"] = "Yes" if hit else "No"
 
+    new_row = pd.DataFrame([{
+        "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
+        "L": round(L, 2),
+        "U": round(U, 2),
+        "actual": None,
+        "inside": None
+    }])
+
+    df_pred = pd.concat([df_pred, new_row], ignore_index=True)
+    # Save with df.to_csv(path, index=False)
+    df_pred.to_csv(path, index=False)
+    return df_pred
+    
 
 
 
@@ -104,6 +135,8 @@ pct_up = ((U - current_price) / current_price) * 100
 pct_dn = ((current_price - L) / current_price) * 100
 price_up = current_price >= closes_live.iloc[-2] if len(closes_live) >= 2 else True
 
+
+df_pred = update_predictions(L, U, current_price)
 
 col_title, col_refresh = st.columns([6, 1])
 
@@ -214,5 +247,9 @@ with b3:
         value=f"{winkler_score:,.2f}",
         delta="Lower is better"
     )
+
+st.divider()
+st.markdown("##### Prediction History")
+st.dataframe(df_pred, use_container_width=True)
 
 st.caption(f"Alphinance · AlphaI × Polaris Challenge · {last_updated}")

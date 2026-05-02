@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import numpy as np
-URL = "https://api.binance.com/api/v3/klines"
+URL = "https://data-api.binance.vision/api/v3/klines"
 
 params = {
     "symbol":"BTCUSDT",

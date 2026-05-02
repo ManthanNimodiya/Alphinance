@@ -20,77 +20,181 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# 10-second live refresh
 st_autorefresh(interval=10_000, limit=10000, key="btc_live_refresh")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
-.metric-card {
-    background: linear-gradient(135deg, #111827 0%, #1a2236 100%);
-    border: 1px solid rgba(240,165,0,0.2);
-    border-radius: 12px;
-    padding: 20px 24px;
-    text-align: center;
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
 }
-.metric-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
+
+/* ── Wordmark ── */
+.wordmark {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: -0.02em;
+}
+.wordmark span {
+    color: #38bdf8;
+}
+
+/* ── Pill badge ── */
+.pill {
+    display: inline-block;
+    background: rgba(56,189,248,0.08);
+    border: 1px solid rgba(56,189,248,0.2);
+    color: #38bdf8;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+.pill-green {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.2);
+    color: #22c55e;
+}
+
+/* ── Big price number ── */
+.price-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 3.4rem;
+    font-weight: 500;
+    color: #f1f5f9;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+.price-delta-up   { color: #22c55e; font-size: 0.9rem; font-weight: 600; }
+.price-delta-down { color: #f87171; font-size: 0.9rem; font-weight: 600; }
+
+/* ── Stat block ── */
+.stat-block {
+    border-left: 2px solid #1e293b;
+    padding: 0 0 0 16px;
+}
+.stat-label {
+    font-size: 0.7rem;
+    font-weight: 500;
     text-transform: uppercase;
-    color: #f0a500;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+.stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    letter-spacing: -0.02em;
+}
+.stat-sub {
+    font-size: 0.68rem;
+    color: #475569;
+    margin-top: 2px;
+}
+
+/* ── Interval bar ── */
+.interval-wrap {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 20px 28px;
+}
+.interval-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+    margin-bottom: 14px;
+}
+.interval-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.bound-low  {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: #f87171;
+    letter-spacing: -0.02em;
+}
+.bound-high {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.7rem;
+    font-weight: 500;
+    color: #4ade80;
+    letter-spacing: -0.02em;
+}
+.bound-sep {
+    flex: 1;
+    height: 1px;
+    background: #334155;
+    position: relative;
+}
+.bound-sep::after {
+    content: '95% CI';
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    color: #475569;
+    background: #1e293b;
+    padding: 0 6px;
+    letter-spacing: 0.06em;
+}
+
+/* ── Metric tile ── */
+.tile {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 16px 20px;
+}
+.tile-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
     margin-bottom: 6px;
 }
-.metric-value {
-    font-size: 1.9rem;
-    font-weight: 900;
-    color: #ffffff;
-    line-height: 1;
+.tile-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    letter-spacing: -0.02em;
 }
-.metric-sub {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.35);
-    margin-top: 4px;
+.tile-sub {
+    font-size: 0.65rem;
+    color: #475569;
+    margin-top: 3px;
 }
-.price-hero {
-    font-size: 3rem;
-    font-weight: 900;
-    background: linear-gradient(90deg, #f0a500, #ff6b35);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-}
-.range-card {
-    background: linear-gradient(135deg, #0d1f2d, #0a1628);
-    border: 1px solid rgba(34,197,94,0.25);
-    border-radius: 12px;
-    padding: 24px 32px;
-    text-align: center;
-}
-.range-lower { color: #ef4444; font-size: 1.5rem; font-weight: 800; }
-.range-upper { color: #22c55e; font-size: 1.5rem; font-weight: 800; }
-.range-sep { color: rgba(255,255,255,0.3); font-size: 1.3rem; margin: 0 16px; }
-.section-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #f0a500;
-    border-left: 3px solid #f0a500;
-    padding-left: 10px;
-    margin: 28px 0 14px 0;
-}
-.live-badge {
-    display: inline-block;
-    border: 1px solid #00c89633;
-    border-radius: 4px;
-    padding: 2px 8px;
+.tile-pass { border-top: 2px solid #22c55e; }
+.tile-neutral { border-top: 2px solid #38bdf8; }
+
+/* ── Section heading ── */
+.sec-head {
     font-size: 0.72rem;
-    color: #00c896;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #475569;
+    margin: 32px 0 12px 0;
 }
+
+/* ── Divider ── */
+hr { border-color: #1e293b !important; margin: 20px 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
+
+# ── Data fetching ─────────────────────────────────────────────────────────────
 
 @st.cache_data(ttl=10)
 def fetch_ticker() -> tuple:
@@ -116,7 +220,8 @@ def fetch_ohlcv(limit=70) -> pd.DataFrame:
 
 @st.cache_data(ttl=3600)
 def run_backtest():
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend", "data", "btc_1h.csv")
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "..", "backend", "data", "btc_1h.csv")
     closes = pd.read_csv(path)["close"]
     alpha = 0.05
     results = []
@@ -142,246 +247,274 @@ def run_backtest():
 
 
 def update_predictions(L, U, current_price):
-    path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "..", "backend", "data", "predictions.csv"
-    )
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "..", "backend", "data", "predictions.csv")
     if os.path.exists(path):
         df_pred = pd.read_csv(path, dtype={"inside": str})
     else:
         df_pred = pd.DataFrame(columns=["timestamp", "L", "U", "actual", "inside"])
     if len(df_pred) > 0:
         df_pred.loc[df_pred.index[-1], "actual"] = current_price
-        hit = df_pred.loc[df_pred.index[-1], "L"] <= current_price <= df_pred.loc[df_pred.index[-1], "U"]
+        hit = (df_pred.loc[df_pred.index[-1], "L"]
+               <= current_price
+               <= df_pred.loc[df_pred.index[-1], "U"])
         df_pred.loc[df_pred.index[-1], "inside"] = "Yes" if hit else "No"
     new_row = pd.DataFrame([{
         "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
-        "L": round(L, 2),
-        "U": round(U, 2),
-        "actual": None,
-        "inside": None
+        "L": round(L, 2), "U": round(U, 2),
+        "actual": None, "inside": None
     }])
     df_pred = pd.concat([df_pred, new_row], ignore_index=True)
     df_pred.to_csv(path, index=False)
     return df_pred
 
 
-# ── Fetch data ────────────────────────────────────────────────────────────────
+# ── Fetch ─────────────────────────────────────────────────────────────────────
 try:
-    df = fetch_ohlcv(limit=70)
-    current_price, change_pct = fetch_ticker()
+    df          = fetch_ohlcv(limit=70)
+    price, chg  = fetch_ticker()
     closes_live = df["close"].reset_index(drop=True)
-    L, U = predict_intervals(closes_live, t=len(closes_live))
-    last_updated = datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")
+    L, U        = predict_intervals(closes_live, t=len(closes_live))
+    now_str     = datetime.utcnow().strftime("%H:%M:%S UTC")
+    today_str   = datetime.utcnow().strftime("%d %b %Y")
 except Exception as e:
     st.error(f"Could not fetch data: {e}")
     st.stop()
 
 width_val = U - L
-pct_up = ((U - current_price) / current_price) * 100
-pct_dn = ((current_price - L) / current_price) * 100
-price_up = current_price >= closes_live.iloc[-2] if len(closes_live) >= 2 else True
+pct_up    = ((U - price) / price) * 100
+pct_dn    = ((price - L) / price) * 100
+price_up  = price >= closes_live.iloc[-2] if len(closes_live) >= 2 else True
+df_pred   = update_predictions(L, U, price)
 
-df_pred = update_predictions(L, U, current_price)
 
-# ── Header ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div style="text-align:center; padding: 28px 0 6px 0;">
-    <span style="font-size:2.6rem; font-weight:900;
-        background:linear-gradient(90deg,#f0a500,#ff6b35);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-        ₿ Alphinance
-    </span>
-    <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-top:5px;">
-        BTC/USDT &nbsp;·&nbsp; 1-Hour Prediction &nbsp;·&nbsp; AlphaI × Polaris Build Challenge
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# ══════════════════════════════════════════════════════════════════════════════
+# LAYOUT
+# ══════════════════════════════════════════════════════════════════════════════
 
-st.divider()
+# ── Top bar ──────────────────────────────────────────────────────────────────
+col_logo, col_meta, col_btn = st.columns([3, 5, 1])
 
-# ── Live Price ────────────────────────────────────────────────────────────────
-arrow = "▲" if change_pct >= 0 else "▼"
-change_color = "#22c55e" if change_pct >= 0 else "#ef4444"
+with col_logo:
+    st.markdown("""
+    <div style="padding-top:6px;">
+        <span class="wordmark">Alpha<span>nance</span></span>
+    </div>""", unsafe_allow_html=True)
 
-col_price, col_refresh = st.columns([5, 1])
-with col_price:
+with col_meta:
     st.markdown(f"""
-    <div style="padding: 4px 0 8px 0;">
-        <div style="font-size:0.72rem; font-weight:600; letter-spacing:.12em;
-                    text-transform:uppercase; color:#f0a500; margin-bottom:6px;">
-            Current BTC Price
-        </div>
-        <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
-            <span class="price-hero">${current_price:,.2f}</span>
-            <span style="font-size:1rem; color:{change_color}; font-weight:700;">
-                {arrow} {abs(change_pct):.2f}% 24h
-            </span>
-            <span class="live-badge">● LIVE (10s)</span>
-        </div>
-        <div style="font-size:0.72rem; color:rgba(255,255,255,0.3); margin-top:5px;">
-            ⚡ Refreshes every 10s · Last: {last_updated}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    <div style="display:flex; gap:8px; align-items:center; padding-top:10px; flex-wrap:wrap;">
+        <span class="pill">BTC / USDT</span>
+        <span class="pill">1-Hour</span>
+        <span class="pill-green pill">● Live · {now_str}</span>
+        <span style="font-size:0.68rem; color:#475569;">{today_str}</span>
+    </div>""", unsafe_allow_html=True)
 
-with col_refresh:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    if st.button("↻ Refresh", use_container_width=True):
+with col_btn:
+    st.markdown("<div style='padding-top:4px;'>", unsafe_allow_html=True)
+    if st.button("↻", use_container_width=True, help="Clear cache and refresh"):
         fetch_ohlcv.clear()
         fetch_ticker.clear()
         st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.divider()
+st.markdown("<hr>", unsafe_allow_html=True)
 
-# ── Prediction Range ──────────────────────────────────────────────────────────
-st.markdown('<div class="section-title">🎯 Next 1-Hour Candle — 95% Confidence Range</div>', unsafe_allow_html=True)
+# ── Price + stats row ─────────────────────────────────────────────────────────
+delta_class = "price-delta-up" if chg >= 0 else "price-delta-down"
+arrow       = "▲" if chg >= 0 else "▼"
+
+col_p, col_s1, col_s2, col_s3 = st.columns([4, 2, 2, 2])
+
+with col_p:
+    st.markdown(f"""
+    <div>
+        <div style="font-size:0.68rem; text-transform:uppercase;
+                    letter-spacing:0.1em; color:#475569; margin-bottom:8px;">
+            Current Price
+        </div>
+        <div class="price-display">${price:,.2f}</div>
+        <div style="margin-top:6px;">
+            <span class="{delta_class}">{arrow} {abs(chg):.2f}% &nbsp;24h</span>
+            &nbsp;
+            <span style="font-size:0.68rem; color:#475569;">
+                ⚡ refreshes every 10s
+            </span>
+        </div>
+    </div>""", unsafe_allow_html=True)
+
+with col_s1:
+    st.markdown(f"""
+    <div class="stat-block">
+        <div class="stat-label">Next Low</div>
+        <div class="stat-value" style="color:#f87171;">${L:,.2f}</div>
+        <div class="stat-sub">−{pct_dn:.2f}%</div>
+    </div>""", unsafe_allow_html=True)
+
+with col_s2:
+    st.markdown(f"""
+    <div class="stat-block">
+        <div class="stat-label">Next High</div>
+        <div class="stat-value" style="color:#4ade80;">${U:,.2f}</div>
+        <div class="stat-sub">+{pct_up:.2f}%</div>
+    </div>""", unsafe_allow_html=True)
+
+with col_s3:
+    st.markdown(f"""
+    <div class="stat-block">
+        <div class="stat-label">Range Width</div>
+        <div class="stat-value">${width_val:,.2f}</div>
+        <div class="stat-sub">95% confidence</div>
+    </div>""", unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── Prediction interval bar ───────────────────────────────────────────────────
 st.markdown(f"""
-<div class="range-card">
-    <div style="font-size:0.75rem; color:rgba(255,255,255,0.35); margin-bottom:12px;
-                letter-spacing:.1em; text-transform:uppercase;">
-        Predicted range for the next 1-hour bar
-    </div>
-    <span class="range-lower">Lower: ${L:,.2f}</span>
-    <span class="range-sep">|</span>
-    <span class="range-upper">Upper: ${U:,.2f}</span>
-    <div style="margin-top:10px; font-size:0.78rem; color:rgba(255,255,255,0.3);">
-        Width: ${width_val:,.2f} &nbsp;·&nbsp; Midpoint: ${(U+L)/2:,.2f}
+<div class="interval-wrap">
+    <div class="interval-label">Next 1-hour candle · predicted interval</div>
+    <div class="interval-row">
+        <span class="bound-low">${L:,.2f}</span>
+        <div class="bound-sep"></div>
+        <span class="bound-high">${U:,.2f}</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Metrics ───────────────────────────────────────────────────────────────────
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Next Hour Low</div>
-        <div class="metric-value">${L:,.2f}</div>
-        <div class="metric-sub">-{pct_dn:.2f}% from now</div>
-    </div>""", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Next Hour High</div>
-        <div class="metric-value">${U:,.2f}</div>
-        <div class="metric-sub">+{pct_up:.2f}% from now</div>
-    </div>""", unsafe_allow_html=True)
-with c3:
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Range Width</div>
-        <div class="metric-value">${width_val:,.2f}</div>
-        <div class="metric-sub">95% confidence</div>
-    </div>""", unsafe_allow_html=True)
-with c4:
-    direction = "▲ Up" if price_up else "▼ Down"
-    dir_color = "#22c55e" if price_up else "#ef4444"
-    st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Trend</div>
-        <div class="metric-value" style="color:{dir_color};">{direction}</div>
-        <div class="metric-sub">vs prev close</div>
-    </div>""", unsafe_allow_html=True)
-
-st.divider()
-
 # ── Chart ─────────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-title">📈 Price Chart — Last 50 Bars + Forecast</div>', unsafe_allow_html=True)
+st.markdown('<div class="sec-head">Price chart · last 50 bars</div>', unsafe_allow_html=True)
 
 display_df = df.tail(50).copy().reset_index(drop=True)
-next_time   = display_df["open_time"].iloc[-1] + pd.Timedelta(hours=1)
-pred_x0     = next_time - pd.Timedelta(minutes=20)
-pred_x1     = next_time + pd.Timedelta(minutes=20)
+next_time  = display_df["open_time"].iloc[-1] + pd.Timedelta(hours=1)
+pred_x0    = next_time - pd.Timedelta(minutes=25)
+pred_x1    = next_time + pd.Timedelta(minutes=25)
 
 fig = go.Figure()
 
+# Candle close line
 fig.add_trace(go.Scatter(
     x=display_df["open_time"],
     y=display_df["close"],
     mode="lines",
-    name="BTC/USDT",
-    line=dict(color="#f0a500", width=2),
-    hovertemplate="<b>%{x}</b><br>Close: $%{y:,.2f}<extra></extra>",
+    name="Close",
+    line=dict(color="#38bdf8", width=1.5),
+    hovertemplate="<b>%{x}</b><br>$%{y:,.2f}<extra></extra>",
 ))
 
-fig.add_vrect(x0=pred_x0, x1=pred_x1,
-    fillcolor="rgba(34,197,94,0.08)", line_width=0)
+# Shaded forecast zone
+fig.add_trace(go.Scatter(
+    x=[display_df["open_time"].iloc[-1], pred_x1, pred_x1,
+       display_df["open_time"].iloc[-1]],
+    y=[U, U, L, L],
+    fill="toself",
+    fillcolor="rgba(56,189,248,0.06)",
+    line=dict(width=0),
+    showlegend=False,
+    hoverinfo="skip",
+))
 
-fig.add_shape(type="line",
-    x0=pred_x0, x1=pred_x1, y0=U, y1=U,
-    line=dict(color="#22c55e", width=2, dash="dot"))
+# Upper / lower dashed bounds
+fig.add_shape(type="line", x0=pred_x0, x1=pred_x1, y0=U, y1=U,
+              line=dict(color="#4ade80", width=1.5, dash="dot"))
+fig.add_shape(type="line", x0=pred_x0, x1=pred_x1, y0=L, y1=L,
+              line=dict(color="#f87171", width=1.5, dash="dot"))
 
-fig.add_shape(type="line",
-    x0=pred_x0, x1=pred_x1, y0=L, y1=L,
-    line=dict(color="#ef4444", width=2, dash="dot"))
+# "Now" vertical rule
+fig.add_vline(
+    x=display_df["open_time"].iloc[-1].timestamp() * 1000,
+    line_width=1,
+    line_dash="dot",
+    line_color="rgba(255,255,255,0.1)",
+)
 
 fig.update_layout(
-    height=380,
+    height=340,
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter", color="#e5e7eb"),
-    margin=dict(l=8, r=8, t=16, b=8),
-    xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickfont=dict(size=10)),
-    yaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickprefix="$",
-               tickformat=",.0f", tickfont=dict(size=10)),
+    font=dict(family="Inter", size=11, color="#64748b"),
+    margin=dict(l=0, r=0, t=8, b=0),
+    xaxis=dict(
+        showgrid=True, gridcolor="#1e293b",
+        zeroline=False, tickfont=dict(size=10),
+    ),
+    yaxis=dict(
+        showgrid=True, gridcolor="#1e293b",
+        zeroline=False, tickprefix="$", tickformat=",.0f",
+        tickfont=dict(size=10),
+    ),
     hovermode="x unified",
-    legend=dict(bgcolor="rgba(0,0,0,0)"),
+    legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=10)),
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-st.divider()
+st.markdown("<hr>", unsafe_allow_html=True)
 
-# ── Backtest ──────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-title">📊 30-Day Backtest · 720 Hourly Bars</div>', unsafe_allow_html=True)
+# ── Backtest metrics ──────────────────────────────────────────────────────────
+st.markdown('<div class="sec-head">Backtest · 720 hourly bars · 30 days</div>',
+            unsafe_allow_html=True)
 
-with st.spinner("Running backtest..."):
+with st.spinner(""):
     coverage, avg_width_bt, winkler_score = run_backtest()
 
+ok = coverage >= 0.95
 b1, b2, b3 = st.columns(3)
+
 with b1:
-    ok = coverage >= 0.95
     st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Coverage</div>
-        <div class="metric-value" style="color:{'#22c55e' if ok else '#ef4444'};">
+    <div class="tile {'tile-pass' if ok else 'tile-neutral'}">
+        <div class="tile-label">Coverage</div>
+        <div class="tile-value" style="color:{'#4ade80' if ok else '#f87171'};">
             {coverage*100:.2f}%
         </div>
-        <div class="metric-sub">{'✓ Meets 95% target' if ok else '✗ Below target'}</div>
+        <div class="tile-sub">{'✓ meets 95% target' if ok else '✗ below target'}</div>
     </div>""", unsafe_allow_html=True)
+
 with b2:
     st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Avg Range Width</div>
-        <div class="metric-value">${avg_width_bt:,.2f}</div>
-        <div class="metric-sub">Lower is better</div>
+    <div class="tile tile-neutral">
+        <div class="tile-label">Avg Width</div>
+        <div class="tile-value">${avg_width_bt:,.2f}</div>
+        <div class="tile-sub">lower is better</div>
     </div>""", unsafe_allow_html=True)
+
 with b3:
     st.markdown(f"""
-    <div class="metric-card">
-        <div class="metric-label">Winkler Score</div>
-        <div class="metric-value">{winkler_score:,.2f}</div>
-        <div class="metric-sub">Lower is better</div>
+    <div class="tile tile-neutral">
+        <div class="tile-label">Winkler Score</div>
+        <div class="tile-value">{winkler_score:,.2f}</div>
+        <div class="tile-sub">lower is better</div>
     </div>""", unsafe_allow_html=True)
 
-st.divider()
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<hr>", unsafe_allow_html=True)
 
-# ── Prediction History ────────────────────────────────────────────────────────
-st.markdown('<div class="section-title">📋 Prediction History</div>', unsafe_allow_html=True)
-st.dataframe(df_pred[df_pred["actual"].notna()], use_container_width=True, hide_index=True)
+# ── Prediction history ────────────────────────────────────────────────────────
+st.markdown('<div class="sec-head">Prediction history</div>', unsafe_allow_html=True)
+history = df_pred[df_pred["actual"].notna()].copy()
+if history.empty:
+    st.markdown(
+        '<p style="font-size:0.8rem; color:#475569;">No resolved predictions yet.</p>',
+        unsafe_allow_html=True)
+else:
+    st.dataframe(history, use_container_width=True, hide_index=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(f"""
-<div style="text-align:center; margin-top:40px; padding-top:14px;
-            border-top:1px solid rgba(255,255,255,0.08);
-            font-size:0.72rem; color:rgba(255,255,255,0.25);">
-    Alphinance · AlphaI × Polaris Challenge · {last_updated} ·
-    <a href="https://huggingface.co/spaces/Manthan6683/Alphinance"
-       style="color:rgba(255,255,255,0.35);">Live Dashboard</a> ·
-    <a href="https://github.com/ManthanNimodiya/Alphinance"
-       style="color:rgba(255,255,255,0.35);">GitHub</a>
+<div style="margin-top:40px; padding-top:16px; border-top:1px solid #1e293b;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:8px;">
+    <span style="font-size:0.68rem; color:#334155;">
+        Alphinance · Student-t rolling interval · AlphaI × Polaris Challenge
+    </span>
+    <span style="font-size:0.68rem; color:#334155;">
+        <a href="https://huggingface.co/spaces/Manthan6683/Alphinance"
+           style="color:#38bdf8; text-decoration:none;">Live Dashboard</a>
+        &nbsp;·&nbsp;
+        <a href="https://github.com/ManthanNimodiya/Alphinance"
+           style="color:#38bdf8; text-decoration:none;">GitHub</a>
+    </span>
 </div>
 """, unsafe_allow_html=True)

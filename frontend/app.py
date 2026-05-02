@@ -1,6 +1,5 @@
 import sys
 import os
-# path fix so Python can find backend/model.py
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
 import streamlit as st
@@ -10,6 +9,7 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
 from backend.model import predict_intervals
+from streamlit_autorefresh import st_autorefresh
 
 URL = "https://data-api.binance.vision/api/v3"
 
@@ -20,12 +20,86 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-@st.cache_data(ttl=60)
-def fetch_ticker() -> float:
-    r = requests.get(f"{URL}/ticker/price",
+# 10-second live refresh
+st_autorefresh(interval=10_000, limit=10000, key="btc_live_refresh")
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+
+.metric-card {
+    background: linear-gradient(135deg, #111827 0%, #1a2236 100%);
+    border: 1px solid rgba(240,165,0,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: center;
+}
+.metric-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #f0a500;
+    margin-bottom: 6px;
+}
+.metric-value {
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+}
+.metric-sub {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 4px;
+}
+.price-hero {
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(90deg, #f0a500, #ff6b35);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+}
+.range-card {
+    background: linear-gradient(135deg, #0d1f2d, #0a1628);
+    border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 12px;
+    padding: 24px 32px;
+    text-align: center;
+}
+.range-lower { color: #ef4444; font-size: 1.5rem; font-weight: 800; }
+.range-upper { color: #22c55e; font-size: 1.5rem; font-weight: 800; }
+.range-sep { color: rgba(255,255,255,0.3); font-size: 1.3rem; margin: 0 16px; }
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f0a500;
+    border-left: 3px solid #f0a500;
+    padding-left: 10px;
+    margin: 28px 0 14px 0;
+}
+.live-badge {
+    display: inline-block;
+    border: 1px solid #00c89633;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    color: #00c896;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+@st.cache_data(ttl=10)
+def fetch_ticker() -> tuple:
+    r = requests.get(f"{URL}/ticker/24hr",
                      params={"symbol": "BTCUSDT"}, timeout=10)
     r.raise_for_status()
-    return float(r.json()["price"])
+    d = r.json()
+    return float(d["lastPrice"]), float(d["priceChangePercent"])
+
 
 @st.cache_data(ttl=300)
 def fetch_ohlcv(limit=70) -> pd.DataFrame:
@@ -39,70 +113,47 @@ def fetch_ohlcv(limit=70) -> pd.DataFrame:
     df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
     return df
 
+
 @st.cache_data(ttl=3600)
 def run_backtest():
-    # 1. load the csv
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend", "data", "btc_1h.csv")
     closes = pd.read_csv(path)["close"]
-    # 2. set alpha = 0.05
     alpha = 0.05
-    # 3. results = []
     results = []
-    # 4. loop t from 21 to 719:
-    #       call predict_intervals(closes, t) → get L, U
-    #       get actual = closes.iloc[t]
-    #       append {"L": L, "U": U, "actual": actual}
-    for t in range(21,720):
-        L,U =predict_intervals(closes,t)
+    for t in range(21, 720):
+        L, U = predict_intervals(closes, t)
         actual = closes.iloc[t]
-        results.append({"L":L,"U":U,"actual":actual})
-    # 5. convert to DataFrame
+        results.append({"L": L, "U": U, "actual": actual})
     df = pd.DataFrame(results)
-    # 6. compute coverage, avg_width, winkler
-    
-    # Coverage
     inside = (df["actual"] >= df["L"]) & (df["actual"] <= df["U"])
     coverage = inside.mean()
-
-    # avg_width
-    avg_width=(df["U"]-df["L"]).mean()
-    # winkler
-    width = df["U"]-df["L"]
-
+    avg_width = (df["U"] - df["L"]).mean()
+    width = df["U"] - df["L"]
     winkler = np.where(
         df["actual"] < df["L"],
-        width + (2/alpha)*(df["L"] - df["actual"]),
+        width + (2 / alpha) * (df["L"] - df["actual"]),
         np.where(
             df["actual"] > df["U"],
-            width + (2/alpha)*(df["actual"] - df["U"]),
+            width + (2 / alpha) * (df["actual"] - df["U"]),
             width
         )
     )
+    return float(coverage), float(avg_width), float(np.mean(winkler))
 
-    winkler_score = np.mean(winkler)
-    # 7. return all three
 
-    return float(coverage), float(avg_width), float(winkler_score)
-
-# Bonus - Persistence Model
 def update_predictions(L, U, current_price):
-    # load csv
     path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         "..", "backend", "data", "predictions.csv"
     )
-    # Check exists
     if os.path.exists(path):
-        df_pred = pd.read_csv(path, dtype={"inside":str})
+        df_pred = pd.read_csv(path, dtype={"inside": str})
     else:
         df_pred = pd.DataFrame(columns=["timestamp", "L", "U", "actual", "inside"])
-    # Append new row — timestamp = datetime.utcnow(), L, U, actual=None, inside=None
     if len(df_pred) > 0:
         df_pred.loc[df_pred.index[-1], "actual"] = current_price
         hit = df_pred.loc[df_pred.index[-1], "L"] <= current_price <= df_pred.loc[df_pred.index[-1], "U"]
-        
         df_pred.loc[df_pred.index[-1], "inside"] = "Yes" if hit else "No"
-
     new_row = pd.DataFrame([{
         "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
         "L": round(L, 2),
@@ -110,19 +161,15 @@ def update_predictions(L, U, current_price):
         "actual": None,
         "inside": None
     }])
-
     df_pred = pd.concat([df_pred, new_row], ignore_index=True)
-    # Save with df.to_csv(path, index=False)
     df_pred.to_csv(path, index=False)
     return df_pred
-    
 
 
-
-# Fetch all data
+# ── Fetch data ────────────────────────────────────────────────────────────────
 try:
     df = fetch_ohlcv(limit=70)
-    current_price = fetch_ticker()
+    current_price, change_pct = fetch_ticker()
     closes_live = df["close"].reset_index(drop=True)
     L, U = predict_intervals(closes_live, t=len(closes_live))
     last_updated = datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")
@@ -135,17 +182,51 @@ pct_up = ((U - current_price) / current_price) * 100
 pct_dn = ((current_price - L) / current_price) * 100
 price_up = current_price >= closes_live.iloc[-2] if len(closes_live) >= 2 else True
 
-
 df_pred = update_predictions(L, U, current_price)
 
-col_title, col_refresh = st.columns([6, 1])
+# ── Header ────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div style="text-align:center; padding: 28px 0 6px 0;">
+    <span style="font-size:2.6rem; font-weight:900;
+        background:linear-gradient(90deg,#f0a500,#ff6b35);
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+        ₿ Alphinance
+    </span>
+    <div style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-top:5px;">
+        BTC/USDT &nbsp;·&nbsp; 1-Hour Prediction &nbsp;·&nbsp; AlphaI × Polaris Build Challenge
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-with col_title:
-    st.markdown("## ₿ Alphinance")
-    st.caption(f"BTC/USDT · 1-Hour Prediction · {last_updated}")
+st.divider()
+
+# ── Live Price ────────────────────────────────────────────────────────────────
+arrow = "▲" if change_pct >= 0 else "▼"
+change_color = "#22c55e" if change_pct >= 0 else "#ef4444"
+
+col_price, col_refresh = st.columns([5, 1])
+with col_price:
+    st.markdown(f"""
+    <div style="padding: 4px 0 8px 0;">
+        <div style="font-size:0.72rem; font-weight:600; letter-spacing:.12em;
+                    text-transform:uppercase; color:#f0a500; margin-bottom:6px;">
+            Current BTC Price
+        </div>
+        <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
+            <span class="price-hero">${current_price:,.2f}</span>
+            <span style="font-size:1rem; color:{change_color}; font-weight:700;">
+                {arrow} {abs(change_pct):.2f}% 24h
+            </span>
+            <span class="live-badge">● LIVE (10s)</span>
+        </div>
+        <div style="font-size:0.72rem; color:rgba(255,255,255,0.3); margin-top:5px;">
+            ⚡ Refreshes every 10s · Last: {last_updated}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col_refresh:
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br><br>", unsafe_allow_html=True)
     if st.button("↻ Refresh", use_container_width=True):
         fetch_ohlcv.clear()
         fetch_ticker.clear()
@@ -153,31 +234,63 @@ with col_refresh:
 
 st.divider()
 
+# ── Prediction Range ──────────────────────────────────────────────────────────
+st.markdown('<div class="section-title">🎯 Next 1-Hour Candle — 95% Confidence Range</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="range-card">
+    <div style="font-size:0.75rem; color:rgba(255,255,255,0.35); margin-bottom:12px;
+                letter-spacing:.1em; text-transform:uppercase;">
+        Predicted range for the next 1-hour bar
+    </div>
+    <span class="range-lower">Lower: ${L:,.2f}</span>
+    <span class="range-sep">|</span>
+    <span class="range-upper">Upper: ${U:,.2f}</span>
+    <div style="margin-top:10px; font-size:0.78rem; color:rgba(255,255,255,0.3);">
+        Width: ${width_val:,.2f} &nbsp;·&nbsp; Midpoint: ${(U+L)/2:,.2f}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
+st.markdown("<br>", unsafe_allow_html=True)
 
-# Metrics Section
-st.markdown("##### Live")
-
+# ── Metrics ───────────────────────────────────────────────────────────────────
 c1, c2, c3, c4 = st.columns(4)
-
 with c1:
-    st.metric(
-        label="BTC Price",
-        value=f"${current_price:,.2f}",
-        delta="▲ Up" if price_up else "▼ Down"
-    )
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Next Hour Low</div>
+        <div class="metric-value">${L:,.2f}</div>
+        <div class="metric-sub">-{pct_dn:.2f}% from now</div>
+    </div>""", unsafe_allow_html=True)
 with c2:
-    st.metric(label="Next Hour Low",  value=f"${L:,.2f}", delta=f"-{pct_dn:.2f}%")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Next Hour High</div>
+        <div class="metric-value">${U:,.2f}</div>
+        <div class="metric-sub">+{pct_up:.2f}% from now</div>
+    </div>""", unsafe_allow_html=True)
 with c3:
-    st.metric(label="Next Hour High", value=f"${U:,.2f}", delta=f"+{pct_up:.2f}%")
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Range Width</div>
+        <div class="metric-value">${width_val:,.2f}</div>
+        <div class="metric-sub">95% confidence</div>
+    </div>""", unsafe_allow_html=True)
 with c4:
-    st.metric(label="Range Width",    value=f"${width_val:,.2f}", delta="95% confidence")
-
-
+    direction = "▲ Up" if price_up else "▼ Down"
+    dir_color = "#22c55e" if price_up else "#ef4444"
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Trend</div>
+        <div class="metric-value" style="color:{dir_color};">{direction}</div>
+        <div class="metric-sub">vs prev close</div>
+    </div>""", unsafe_allow_html=True)
 
 st.divider()
 
-# prepare chart data
+# ── Chart ─────────────────────────────────────────────────────────────────────
+st.markdown('<div class="section-title">📈 Price Chart — Last 50 Bars + Forecast</div>', unsafe_allow_html=True)
+
 display_df = df.tail(50).copy().reset_index(drop=True)
 next_time   = display_df["open_time"].iloc[-1] + pd.Timedelta(hours=1)
 pred_x0     = next_time - pd.Timedelta(minutes=20)
@@ -185,71 +298,90 @@ pred_x1     = next_time + pd.Timedelta(minutes=20)
 
 fig = go.Figure()
 
-# price line
 fig.add_trace(go.Scatter(
     x=display_df["open_time"],
     y=display_df["close"],
     mode="lines",
     name="BTC/USDT",
-    line=dict(color="#111111", width=2),
+    line=dict(color="#f0a500", width=2),
+    hovertemplate="<b>%{x}</b><br>Close: $%{y:,.2f}<extra></extra>",
 ))
 
-# prediction shaded zone
 fig.add_vrect(x0=pred_x0, x1=pred_x1,
-    fillcolor="rgba(59,130,246,0.1)", line_width=0)
+    fillcolor="rgba(34,197,94,0.08)", line_width=0)
 
-# upper bound
 fig.add_shape(type="line",
     x0=pred_x0, x1=pred_x1, y0=U, y1=U,
-    line=dict(color="green", width=2, dash="dot"))
+    line=dict(color="#22c55e", width=2, dash="dot"))
 
-# lower bound
 fig.add_shape(type="line",
     x0=pred_x0, x1=pred_x1, y0=L, y1=L,
-    line=dict(color="red", width=2, dash="dot"))
+    line=dict(color="#ef4444", width=2, dash="dot"))
 
 fig.update_layout(
-    height=400,
-    paper_bgcolor="#ffffff",
-    plot_bgcolor="#ffffff",
-    margin=dict(l=8, r=8, t=32, b=8),
-    xaxis=dict(gridcolor="#f0f0f0"),
-    yaxis=dict(gridcolor="#f0f0f0", tickprefix="$", tickformat=",.0f"),
+    height=380,
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(family="Inter", color="#e5e7eb"),
+    margin=dict(l=8, r=8, t=16, b=8),
+    xaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickfont=dict(size=10)),
+    yaxis=dict(gridcolor="rgba(255,255,255,0.06)", tickprefix="$",
+               tickformat=",.0f", tickfont=dict(size=10)),
+    hovermode="x unified",
+    legend=dict(bgcolor="rgba(0,0,0,0)"),
 )
 
 st.plotly_chart(fig, use_container_width=True)
 
-
-# backtest metrics
 st.divider()
-st.markdown("##### 30-Day Backtest · 720 Hourly Bars")
+
+# ── Backtest ──────────────────────────────────────────────────────────────────
+st.markdown('<div class="section-title">📊 30-Day Backtest · 720 Hourly Bars</div>', unsafe_allow_html=True)
 
 with st.spinner("Running backtest..."):
     coverage, avg_width_bt, winkler_score = run_backtest()
 
 b1, b2, b3 = st.columns(3)
-
 with b1:
-    st.metric(
-        label="Coverage",
-        value=f"{coverage*100:.2f}%",
-        delta="✓ Meets target" if coverage >= 0.95 else "✗ Below target"
-    )
+    ok = coverage >= 0.95
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Coverage</div>
+        <div class="metric-value" style="color:{'#22c55e' if ok else '#ef4444'};">
+            {coverage*100:.2f}%
+        </div>
+        <div class="metric-sub">{'✓ Meets 95% target' if ok else '✗ Below target'}</div>
+    </div>""", unsafe_allow_html=True)
 with b2:
-    st.metric(
-        label="Avg Range Width",
-        value=f"${avg_width_bt:,.2f}",
-        delta="Lower is better"
-    )
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Avg Range Width</div>
+        <div class="metric-value">${avg_width_bt:,.2f}</div>
+        <div class="metric-sub">Lower is better</div>
+    </div>""", unsafe_allow_html=True)
 with b3:
-    st.metric(
-        label="Winkler Score",
-        value=f"{winkler_score:,.2f}",
-        delta="Lower is better"
-    )
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-label">Winkler Score</div>
+        <div class="metric-value">{winkler_score:,.2f}</div>
+        <div class="metric-sub">Lower is better</div>
+    </div>""", unsafe_allow_html=True)
 
 st.divider()
-st.markdown("##### Prediction History")
-st.dataframe(df_pred[df_pred["actual"].notna()], use_container_width=True)
 
-st.caption(f"Alphinance · AlphaI × Polaris Challenge · {last_updated} · [Live Dashboard](https://huggingface.co/spaces/Manthan6683/Alphinance) · [GitHub](https://github.com/ManthanNimodiya/Alphinance)")
+# ── Prediction History ────────────────────────────────────────────────────────
+st.markdown('<div class="section-title">📋 Prediction History</div>', unsafe_allow_html=True)
+st.dataframe(df_pred[df_pred["actual"].notna()], use_container_width=True, hide_index=True)
+
+# ── Footer ────────────────────────────────────────────────────────────────────
+st.markdown(f"""
+<div style="text-align:center; margin-top:40px; padding-top:14px;
+            border-top:1px solid rgba(255,255,255,0.08);
+            font-size:0.72rem; color:rgba(255,255,255,0.25);">
+    Alphinance · AlphaI × Polaris Challenge · {last_updated} ·
+    <a href="https://huggingface.co/spaces/Manthan6683/Alphinance"
+       style="color:rgba(255,255,255,0.35);">Live Dashboard</a> ·
+    <a href="https://github.com/ManthanNimodiya/Alphinance"
+       style="color:rgba(255,255,255,0.35);">GitHub</a>
+</div>
+""", unsafe_allow_html=True)

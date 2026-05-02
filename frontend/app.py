@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 from backend.model import predict_intervals
 
-BINANCE_BASE = "https://data-api.binance.vision/api/v3"
+URL = "https://data-api.binance.vision/api/v3"
 
 st.set_page_config(
     page_title="Alphinance | BTC Prediction",
@@ -22,14 +22,14 @@ st.set_page_config(
 
 @st.cache_data(ttl=60)
 def fetch_ticker() -> float:
-    r = requests.get(f"{BINANCE_BASE}/ticker/price",
+    r = requests.get(f"{URL}/ticker/price",
                      params={"symbol": "BTCUSDT"}, timeout=10)
     r.raise_for_status()
     return float(r.json()["price"])
 
 @st.cache_data(ttl=300)
 def fetch_ohlcv(limit=70) -> pd.DataFrame:
-    r = requests.get(f"{BINANCE_BASE}/klines",
+    r = requests.get(f"{URL}/klines",
                      params={"symbol": "BTCUSDT", "interval": "1h", "limit": limit},
                      timeout=10)
     r.raise_for_status()
